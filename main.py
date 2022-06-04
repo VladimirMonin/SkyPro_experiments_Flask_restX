@@ -5,6 +5,7 @@ from sqlalchemy import or_, desc, func  # Импортируем доп. фун�
 from marshmallow import Schema, fields  # Имортируем Зефир. Для сериализации/десериализации объектов
 from flask import request, jsonify
 from flask_restx import Resource
+import json
 
 app = Flask(__name__)  # Создаем приложение Фласк
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Настраиваем приложение для работы в ОЗУ
@@ -105,13 +106,17 @@ shop_schema = ShopSchema()
 
 # Тест ДЕСЕРИАЛИЗАЦИИ
 
-cat_6_dict_str = '{"name": "Схемкин", "id_shop": 3}'
-cat_6_dict = cat_schema.loads(cat_6_dict_str)
+cat_6_dict_str = '{"name": "Схемкин", "id_shop": 3}'  # Строка с котиком №6
+cat_6_dict = cat_schema.loads(cat_6_dict_str)  # Превращаем его в словарь
 
-cat_6 = Cat(**cat_6_dict)
+cat_6 = Cat(**cat_6_dict)  # Создаем объект Алхимии
 
-db.session.add(cat_6)
-db.session.commit()
+db.session.add(cat_6)  # Записываем
+db.session.commit()  # Коммитим
 
-query = db.session.query(Cat.name, Cat.id, Shop.shop_title).filter(Cat.id == 6).join(Shop).one()
-print(query)
+# Тест СЕРИАЛИЗАЦИИ
+
+cat_6 = db.session.query(Cat).filter(Cat.id == 6).join(Shop).one()
+string = cat_schema.dump(cat_6)
+print(string)
+print(type(string))
