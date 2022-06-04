@@ -57,18 +57,6 @@ class Shop(db.Model):  # Создаем таблицу с магазинами
 
 db.create_all()
 
-
-class CatSchema(Schema):  # Делаем схему для таблицы котиков
-    id = fields.Int(dump_only=True)
-    name = fields.Str()
-    id_shop = fields.Int()
-
-
-class ShopSchema(Schema):  # Делаем схему для таблицы магазинов
-    id = fields.Int(dump_only=True)
-    shop_title = fields.Str()
-
-
 shop_1 = Shop(id=1, shop_title='Вселенная котиков')
 shop_2 = Shop(id=2, shop_title='Котоны')
 shop_3 = Shop(id=3, shop_title='Котопёс')
@@ -90,8 +78,40 @@ db.session.commit()
 # print(Shop.query.get(1))
 # query = db.session.query(Cat.name, Shop.shop_title).join(Shop).all() # Сделали запрос всех котиков и подтянули с другой таблы магазины
 # query = db.session.query(Cat.name, Cat.id, Shop.shop_title).join(Shop).filter(Cat.id.in_([1, 2])) # фильтр по ID котиков
-query = db.session.query(Cat.name, Cat.id, Shop.shop_title).filter(Cat.name == 'Альбус', Shop.shop_title == 'Котоны').join(Shop) # Параметр outer=True дает левый джоин, по умолчанию иннер
+query = db.session.query(Cat.name, Cat.id, Shop.shop_title).filter(Cat.name == 'Альбус',
+                                                                                Shop.shop_title == 'Котоны').join(
+    Shop)  # Параметр outer=True дает левый джоин, по умолчанию иннер
 
 # for cat in query.all(): # Фильтрацию ALL можно сделать как тут, так и выше, в самом запросе
-for cat in query:
-    print(cat)
+# for cat in query:
+#     print(cat)
+
+
+# Схемы сериализации
+
+class CatSchema(Schema):  # Делаем схему для таблицы котиков
+    id = fields.Int(dump_only=True)
+    name = fields.Str()
+    id_shop = fields.Int()
+
+
+class ShopSchema(Schema):  # Делаем схему для таблицы магазинов
+    id = fields.Int(dump_only=True)
+    shop_title = fields.Str()
+
+
+cat_schema = CatSchema()
+shop_schema = ShopSchema()
+
+# Тест ДЕСЕРИАЛИЗАЦИИ
+
+cat_6_dict_str = '{"name": "Схемкин", "id_shop": 3}'
+cat_6_dict = cat_schema.loads(cat_6_dict_str)
+
+cat_6 = Cat(**cat_6_dict)
+
+db.session.add(cat_6)
+db.session.commit()
+
+query = db.session.query(Cat.name, Cat.id, Shop.shop_title).filter(Cat.id == 6).join(Shop).one()
+print(query)
