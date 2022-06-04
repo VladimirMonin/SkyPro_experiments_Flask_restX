@@ -120,3 +120,5 @@ cat_6 = db.session.query(Cat).filter(Cat.id == 6).join(Shop).one()
 string = cat_schema.dump(cat_6)
 print(string)
 print(type(string))
+
+#TODO Сделать вьюшки наследуемые от Resource (17.2)
