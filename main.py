@@ -4,7 +4,8 @@ from flask_restx import Api
 
 from app.config import Config
 from app.database import db
-from app.models import Shop, Cat
+from app.dao.models.cat import Cat, CatSchema
+from app.dao.models.shop import Shop, ShopSchema
 from app.views.cats import cat_ns
 
 
