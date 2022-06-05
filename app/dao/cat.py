@@ -23,28 +23,12 @@ class CatDAO:
 
         return cat
 
-    def update(self, data):
-        cid = data.get('id')
-        cat = self.get_one(cid)
-
-        cat.name = data.get('name')
-        cat.shop = data.get('shop')
+    def update(self, cat):
 
         self.session.add(cat)
         self.session.commit()
 
         return cat
-
-    def update_partial(self, data):
-        cid = data.get('id')
-        cat = self.get_one(cid)
-        if 'name' in data:
-            cat.name = data.get('name')
-        if 'shop' in data:
-            cat.shop = data.get('shop')
-
-        self.session.add(cat)
-        self.session.commit()
 
     def delete(self, cid):
         cat = self.get_one(cid)
