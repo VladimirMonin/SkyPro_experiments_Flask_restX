@@ -11,8 +11,9 @@ from app.config import Config
 
 
 def create_app(config: Config) -> Flask:
-    application = Flask(__name__)
-    application.config.from_object(config)
+    application = Flask(__name__)  # Создаем приложение
+    application.config.from_object(config)  # Конфигурируем приложение
+    application.app_context().push()  # Пушим настройки в приложение (у меня работало и так, но лучше не пропускать)
 
     return application
 
