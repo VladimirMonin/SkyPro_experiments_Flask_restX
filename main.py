@@ -4,12 +4,27 @@ from sqlalchemy.orm import relationship  # Импортируем "отноше�
 from sqlalchemy import or_, desc, func  # Импортируем доп. функции которые могут пригодится
 from marshmallow import Schema, fields  # Имортируем Зефир. Для сериализации/десериализации объектов
 from flask import request, jsonify
-from flask_restx import Resource
+from flask_restx import Resource, Api
 import json
 
-app = Flask(__name__)  # Создаем приложение Фласк
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Настраиваем приложение для работы в ОЗУ
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Выключаем параметр приводящий к сообщению об ошибке
+from app.config import Config
+
+
+def create_app(config: Config) -> Flask:
+    application = Flask(__name__)
+    application.config.from_object(config)
+
+    return application
+
+
+app_config = Config()
+app = create_app(app_config)  # Создаем приложение Фласк
+
+api = Api(app)
+
+
+cat_ns = api.namespace('cats')
+
 
 """
 Предыстория - вот что говорит вам предупреждение:
@@ -80,8 +95,9 @@ db.session.commit()
 # query = db.session.query(Cat.name, Shop.shop_title).join(Shop).all() # Сделали запрос всех котиков и подтянули с другой таблы магазины
 # query = db.session.query(Cat.name, Cat.id, Shop.shop_title).join(Shop).filter(Cat.id.in_([1, 2])) # фильтр по ID котиков
 query = db.session.query(Cat.name, Cat.id, Shop.shop_title).filter(Cat.name == 'Альбус',
-                                                                                Shop.shop_title == 'Котоны').join(
+                                                                   Shop.shop_title == 'Котоны').join(
     Shop)  # Параметр outer=True дает левый джоин, по умолчанию иннер
+
 
 # for cat in query.all(): # Фильтрацию ALL можно сделать как тут, так и выше, в самом запросе
 # for cat in query:
@@ -102,7 +118,10 @@ class ShopSchema(Schema):  # Делаем схему для таблицы ма�
 
 
 cat_schema = CatSchema()
+cats_schema = CatSchema(many=True)
+
 shop_schema = ShopSchema()
+shops_schema = ShopSchema(many=True)
 
 # Тест ДЕСЕРИАЛИЗАЦИИ
 
@@ -114,11 +133,21 @@ cat_6 = Cat(**cat_6_dict)  # Создаем объект Алхимии
 db.session.add(cat_6)  # Записываем
 db.session.commit()  # Коммитим
 
+
 # Тест СЕРИАЛИЗАЦИИ
 
-cat_6 = db.session.query(Cat).filter(Cat.id == 6).join(Shop).one()
-string = cat_schema.dump(cat_6)
-print(string)
-print(type(string))
+# cat_6 = db.session.query(Cat).filter(Cat.id == 6).join(Shop).one()
+# string = cat_schema.dump(cat_6)
+# print(string)
+# print(type(string))
 
-#TODO Сделать вьюшки наследуемые от Resource (17.2)
+# TODO Сделать вьюшки наследуемые от Resource (17.2)
+
+@cat_ns.route('/')
+class CatsView(Resource):
+    def get(self):
+        all_cats = Cat.query.all()
+        return cats_schema.dump(all_cats), 200
+
+if __name__ == '__main__':
+    app.run(debug=False)
