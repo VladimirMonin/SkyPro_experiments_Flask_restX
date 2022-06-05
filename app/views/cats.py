@@ -1,11 +1,14 @@
 from flask_restx import Resource, Namespace
+
+from app.container import cat_service
 from app.database import db
 from flask import request
 
 from app.dao.models.cat import CatSchema
 from app.dao.models.shop import ShopSchema
 
-cat_ns = Namespace('cats')
+cat_ns = Namespace('cat')
+cats_ns = Namespace('cats')
 
 cat_schema = CatSchema()
 cats_schema = CatSchema(many=True)
@@ -15,7 +18,7 @@ shops_schema = ShopSchema(many=True)
 
 
 @cat_ns.route('/')
-class CatsView(Resource):
+class CatView(Resource):
     def get(self):
         all_cats = cat_service.get_all()  # Пока убрал изначальный вариант Cat.query.all()
         return cats_schema.dump(all_cats), 200
@@ -27,11 +30,12 @@ class CatsView(Resource):
         return '', 201
 
 
-cat_ns.route('/<int:cid>')
-class CatView(Resource):
+@cats_ns.route('/<int:cid>/')
+class CatsView(Resource):
     def get(self, cid: int):
         cat = cat_service.get_one(cid)
         return cat_schema.dump(cat), 200
+# TODO Методы put patch НЕ РАБОТАЮТ. Остальноё всё ок. Надо найти баг)
 
     def put(self, cid: int):
         request_json = request.json

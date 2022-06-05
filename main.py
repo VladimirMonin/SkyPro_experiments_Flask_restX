@@ -6,7 +6,7 @@ from app.config import Config
 from app.database import db
 from app.dao.models.cat import Cat, CatSchema
 from app.dao.models.shop import Shop, ShopSchema
-from app.views.cats import cat_ns
+from app.views.cats import cat_ns, cats_ns
 
 
 def create_app(config: Config) -> Flask:
@@ -20,7 +20,7 @@ def configure_app(application: Flask):
     db.init_app(application)
     api = Api(app)
     api.add_namespace(cat_ns) # импорт из from app.views.cats import cat_ns
-
+    api.add_namespace(cats_ns)
 
 def create_data():
 
@@ -78,8 +78,6 @@ def create_data():
 # string = cat_schema.dump(cat_6)
 # print(string)
 # print(type(string))
-
-
 
 if __name__ == '__main__':
     app_config = Config()  # Создаем объект кофигурации Фласк from app.config import Config
