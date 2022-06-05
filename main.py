@@ -1,5 +1,5 @@
 from flask import Flask  # Импортируем Flask - нет времени объяснять, просто делай)
-from flask_sqlalchemy import SQLAlchemy  # Импортируем Алхимию для Фласка
+
 from sqlalchemy.orm import relationship  # Импортируем "отношения" для джоинов в Алхимии
 from sqlalchemy import or_, desc, func  # Импортируем доп. функции которые могут пригодится
 from marshmallow import Schema, fields  # Имортируем Зефир. Для сериализации/десериализации объектов
@@ -8,6 +8,7 @@ from flask_restx import Resource, Api
 import json
 
 from app.config import Config
+from app.database import db
 
 
 def create_app(config: Config) -> Flask:
@@ -18,13 +19,11 @@ def create_app(config: Config) -> Flask:
     return application
 
 
-app_config = Config()
-app = create_app(app_config)  # Создаем приложение Фласк
+def configure_app(application: Flask):
+    db.init_app(application)
+    api = Api(app)
+    api.add_namespace(None) # 'cats'
 
-api = Api(app)
-
-
-cat_ns = api.namespace('cats')
 
 
 """
@@ -39,8 +38,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS позволяет отключить систе�
 Не многие люди используют систему событий Flask-SQLAlchemy, но большинство людей не осознают, что могут сэкономить 
 системные ресурсы, отключив ее. Поэтому разумнее по умолчанию отключить его, и те, кто хочет, могут включить его.
 """
-
-db = SQLAlchemy(app)  # Создаем объект Алхимии
 
 
 class Cat(db.Model):  # Создаем таблицу с котиками
@@ -150,5 +147,9 @@ class CatsView(Resource):
         all_cats = Cat.query.all()
         return cats_schema.dump(all_cats), 200
 
+
 if __name__ == '__main__':
+    app_config = Config()  # Создаем объект кофигурации Фласк from app.config import Config
+    app = create_app(app_config)  # Создаем приложение Фласк
+    configure_app(app)
     app.run(debug=False)
