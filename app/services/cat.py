@@ -21,7 +21,7 @@ class CatService:
         cat = self.get_one(cid)
 
         cat.name = data.get('name')
-        cat.shop = data.get('id_shop')
+        cat.id_shop = data.get('id_shop')
 
         self.dao.update(cat)
         pass
@@ -32,7 +32,7 @@ class CatService:
         if 'name' in data:
             cat.name = data.get('name')
         if 'id_shop' in data:
-            cat.shop = data.get('id_shop')
+            cat.id_shop = data.get('id_shop')
 
         self.dao.update(cat)
         pass

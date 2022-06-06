@@ -37,16 +37,16 @@ class CatsView(Resource):
         return cat_schema.dump(cat), 200
 # TODO Методы put patch НЕ РАБОТАЮТ. Остальноё всё ок. Надо найти баг)
 
-    def put(self, cid: int):
+    def put(self, cid):
         request_json = request.json
-        request_json['id'] = cid  # Добавляем ID из урла для передачи далее
+        request_json['id'] = int(cid)  # Добавляем ID из урла для передачи далее
         cat_service.update(request_json)
         return '', 204
 
-    def patch(self, cid: int):
+    def patch(self, cid):
         request_json = request.json
         request_json['id'] = cid  # Добавляем ID из урла для передачи далее
-        cat_service.update.partial(request_json)
+        cat_service.update_partial(request_json)
         return '', 204
 
     def delete(self, cid: int):
